@@ -174,7 +174,7 @@
                                     DEVEL_POM_URL="https://raw.githubusercontent.com/$USERNAME_PROJECT_NAME/$DEVELOPMENT_BRANCH/pom.xml"
                                     DEVEL_VERSION=`curl -s $DEVEL_POM_URL|grep "modelVersion"|xargs|cut -c15-19`
                                     if [ "$DEVEL_VERSION" == "" ]; then
-                                        echo "ERROR: Could not get development branch version, will not push"
+                                        echo "ERROR: Could not get $DEVELOPMENT_BRANCH branch version, will not push"
                                         exit 1
                                     fi
                                     if [ "$CURRENT_VERSION" == "$DEVEL_VERSION" ]; then
