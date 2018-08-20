@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.1</modelVersion>
 
     <groupId>com.au.example</groupId>
     <artifactId>eureka-swagger-aggregate</artifactId>
@@ -174,11 +174,11 @@
                                     DEVEL_POM_URL="https://raw.githubusercontent.com/$USERNAME_PROJECT_NAME/$DEVELOPMENT_BRANCH/pom.xml"
                                     DEVEL_VERSION=`curl -s $DEVEL_POM_URL|grep "modelVersion"|xargs|cut -c15-19`
                                     if [ "$DEVEL_VERSION" == "" ]; then
-                                        echo "ERROR: Could not get development branch version, will not push"
+                                        echo "ERROR: Could not get $DEVELOPMENT_BRANCH branch version, will not push."
                                         exit 1
                                     fi
                                     if [ "$CURRENT_VERSION" == "$DEVEL_VERSION" ]; then
-                                        echo "ERROR: Current branch version: $CURRENT_VERSION and development version: $DEVEL_VERSION are equal, cannot push, update version number according to semver."
+                                        echo "ERROR: Current branch version: $CURRENT_VERSION and development version: $DEVEL_VERSION are equal, cannot push, update version number according to semver.io"
                                         sleep 5
                                         exit 1
                                     else
