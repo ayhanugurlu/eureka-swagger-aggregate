@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.au.example</groupId>
+    <artifactId>eureka-swagger-aggregate</artifactId>
+    <version>0.0.1</version>
+    <packaging>jar</packaging>
+
+    <name>discovery</name>
+    <description>Spring Cloud Swagger Aggregate Project</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.9.RELEASE</version>
+        <relativePath/>
+    </parent>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <spring-cloud.version>Edgware.RELEASE</spring-cloud.version>
+        <version.springfox-swagger2>2.8.0</version.springfox-swagger2>
+        <version.springfox-swagger-ui>2.8.0</version.springfox-swagger-ui>
+        <version.findbugs-jsr305>3.0.2</version.findbugs-jsr305>
+        <version.maven-checkstyle-plugin>3.0.0</version.maven-checkstyle-plugin>
+        <version.maven-surefire-plugin>2.22.0</version.maven-surefire-plugin>
+        <version.jacoco-maven-plugin>0.8.1</version.jacoco-maven-plugin>
+        <jacoco.line-coverage>0.90</jacoco.line-coverage>
+        <jacoco.branch-coverage>0.90</jacoco.branch-coverage>
+    </properties>
+
+    <dependencies>
+        <!-- ********* -->
+        <!--  RUNTIME  -->
+        <!-- ********* -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- ********* -->
+        <!-- PACK WITH -->
+        <!-- ********* -->
+
+        <!-- SPRING -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-eureka-server</artifactId>
+        </dependency>
+
+        <!--Swagger -->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${version.springfox-swagger2}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${version.springfox-swagger-ui}</version>
+        </dependency>
+
+        <!-- ********* -->
+        <!--   TEST    -->
+        <!-- ********* -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-netflix-eureka-server</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <!-- SPRING BOOT PLUGIN -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- JACOCO PLUGIN -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${version.jacoco-maven-plugin}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <propertyName>jacocoArgLine</propertyName>
+                            <includes>
+                                <include>com.au.example.discovery.*</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${jacoco.line-coverage}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${jacoco.branch-coverage}</minimum>
+                                        </limit>
+                                    </limits>
+                                    <excludes>
+                                    </excludes>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- GIT HOOKS PLUGIN -->
+            <plugin>
+                <groupId>com.github.canmogol</groupId>
+                <artifactId>githook-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>install</goal>
+                        </goals>
+                        <configuration>
+                            <hooks>
+                                <pre-push>
+                                    echo running pre-push hook
+                                    DEVELOPMENT_BRANCH=devel
+                                    echo "Will check $DEVELOPMENT_BRANCH version against current version"
+                                    RAW_URL=https://raw.githubusercontent.com/
+                                    ORIGIN_URL=`git remote get-url origin`
+                                    REMOTE_URL=${ORIGIN_URL:0:${#ORIGIN_URL}-4}
+                                    USERNAME_PROJECT_NAME=${REMOTE_URL:19}
+                                    CURRENT_VERSION=`cat pom.xml |grep "modelVersion"|xargs|cut -c15-19`
+                                    DEVEL_POM_URL="https://raw.githubusercontent.com/$USERNAME_PROJECT_NAME/$DEVELOPMENT_BRANCH/pom.xml"
+                                    DEVEL_VERSION=`curl -s $DEVEL_POM_URL|grep "modelVersion"|xargs|cut -c15-19`
+                                    if [ "$DEVEL_VERSION" == "" ]; then
+                                        echo "ERROR: Could not get development branch version, will not push"
+                                        exit 1
+                                    fi
+                                    if [ "$CURRENT_VERSION" == "$DEVEL_VERSION" ]; then
+                                        echo "ERROR: Current branch version: $CURRENT_VERSION and development version: $DEVEL_VERSION are equal, cannot push, update version number according to semver."
+                                        sleep 5
+                                        exit 1
+                                    else
+                                        echo "SUCCESS: Will push current version"
+                                    fi
+                                </pre-push>
+                            </hooks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- EXEC PLUGIN -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>set pre-commit file as executable</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <workingDirectory>${project.basedir}</workingDirectory>
+                    <executable>chmod</executable>
+                    <arguments>
+                        <argument>755</argument>
+                        <argument>${project.basedir}/.git/hooks/pre-push</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+</project>
