@@ -1,4 +1,4 @@
-package com.au.example.discovery.rest;
+package com.mergenie.apiaggregate.rest;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class ServiceInstanceRestController {
                     .filter(serviceInstance ->
                         serviceInstance instanceof EurekaDiscoveryClient.EurekaServiceInstance)
                     .map(serviceInstance -> ((EurekaDiscoveryClient.EurekaServiceInstance) serviceInstance))
-                    .map(esi -> servicesName + " " + esi.getInstanceInfo().getHomePageUrl())
+                    .map(esi ->  String.format("%s %s", servicesName, esi.getInstanceInfo().getHomePageUrl()))
                     .collect(Collectors.toList()))
             .flatMap(Collection::stream)
             .collect(Collectors.toList());

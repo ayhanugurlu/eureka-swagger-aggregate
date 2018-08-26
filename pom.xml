@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.1</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.au.example</groupId>
-    <artifactId>eureka-swagger-aggregate</artifactId>
-    <version>0.0.1</version>
+    <groupId>com.mergenie</groupId>
+    <artifactId>apiaggregate</artifactId>
+    <version>0.0.3</version>
     <packaging>jar</packaging>
 
     <name>discovery</name>
@@ -25,12 +25,13 @@
         <spring-cloud.version>Edgware.RELEASE</spring-cloud.version>
         <version.springfox-swagger2>2.8.0</version.springfox-swagger2>
         <version.springfox-swagger-ui>2.8.0</version.springfox-swagger-ui>
-        <version.findbugs-jsr305>3.0.2</version.findbugs-jsr305>
+        <version.findbugs-jsr305>3.0.5</version.findbugs-jsr305>
         <version.maven-checkstyle-plugin>3.0.0</version.maven-checkstyle-plugin>
         <version.maven-surefire-plugin>2.22.0</version.maven-surefire-plugin>
         <version.jacoco-maven-plugin>0.8.1</version.jacoco-maven-plugin>
         <jacoco.line-coverage>0.90</jacoco.line-coverage>
         <jacoco.branch-coverage>0.90</jacoco.branch-coverage>
+        <jacoco.complexity-coverage>0.90</jacoco.complexity-coverage>
     </properties>
 
     <dependencies>
@@ -77,10 +78,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-netflix-eureka-server</artifactId>
-        </dependency>
 
     </dependencies>
 
@@ -103,33 +100,52 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <!-- COMPILE PLUGIN -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <showWarnings>true</showWarnings>
+                    <compilerArgs>
+                        <arg>-Xlint:all</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
             <!-- JACOCO PLUGIN -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${version.jacoco-maven-plugin}</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/DiscoveryApplication.*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>prepare-agent</id>
+                        <id>default-prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
-                        <configuration>
-                            <propertyName>jacocoArgLine</propertyName>
-                            <includes>
-                                <include>com.au.example.discovery.*</include>
-                            </includes>
-                        </configuration>
                     </execution>
                     <execution>
-                        <id>check</id>
+                        <id>default-report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-check</id>
                         <goals>
                             <goal>check</goal>
                         </goals>
                         <configuration>
                             <rules>
                                 <rule>
-                                    <element>CLASS</element>
+                                    <element>BUNDLE</element>
                                     <limits>
                                         <limit>
                                             <counter>LINE</counter>
@@ -141,9 +157,12 @@
                                             <value>COVEREDRATIO</value>
                                             <minimum>${jacoco.branch-coverage}</minimum>
                                         </limit>
+                                        <limit>
+                                            <counter>COMPLEXITY</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${jacoco.complexity-coverage}</minimum>
+                                        </limit>
                                     </limits>
-                                    <excludes>
-                                    </excludes>
                                 </rule>
                             </rules>
                         </configuration>
@@ -163,27 +182,29 @@
                         <configuration>
                             <hooks>
                                 <pre-push>
-                                    echo running pre-push hook
-                                    DEVELOPMENT_BRANCH=devel
-                                    echo "Will check $DEVELOPMENT_BRANCH version against current version"
-                                    RAW_URL=https://raw.githubusercontent.com/
-                                    ORIGIN_URL=`git remote get-url origin`
-                                    REMOTE_URL=${ORIGIN_URL:0:${#ORIGIN_URL}-4}
-                                    USERNAME_PROJECT_NAME=${REMOTE_URL:19}
-                                    CURRENT_VERSION=`cat pom.xml |grep "modelVersion"|xargs|cut -c15-19`
-                                    DEVEL_POM_URL="https://raw.githubusercontent.com/$USERNAME_PROJECT_NAME/$DEVELOPMENT_BRANCH/pom.xml"
-                                    DEVEL_VERSION=`curl -s $DEVEL_POM_URL|grep "modelVersion"|xargs|cut -c15-19`
-                                    if [ "$DEVEL_VERSION" == "" ]; then
-                                        echo "ERROR: Could not get $DEVELOPMENT_BRANCH branch version, will not push."
-                                        exit 1
-                                    fi
-                                    if [ "$CURRENT_VERSION" == "$DEVEL_VERSION" ]; then
-                                        echo "ERROR: Current branch version: $CURRENT_VERSION and development version: $DEVEL_VERSION are equal, cannot push, update version number according to semver.io"
-                                        sleep 5
-                                        exit 1
-                                    else
-                                        echo "SUCCESS: Will push current version"
-                                    fi
+echo running pre-push hook
+DEVELOPMENT_BRANCH=devel
+echo "Will check $DEVELOPMENT_BRANCH version against current version"
+RAW_URL=https://raw.githubusercontent.com/
+ORIGIN_URL=`git remote get-url origin`
+REMOTE_URL=${ORIGIN_URL:0:${#ORIGIN_URL}-4}
+USERNAME_PROJECT_NAME=${REMOTE_URL:19}
+CURRENT_VERSION=`cat pom.xml |grep "&lt;version&gt;"|head -n 1|xargs|cut -c10-14`
+DEVEL_POM_URL="https://raw.githubusercontent.com/$USERNAME_PROJECT_NAME/$DEVELOPMENT_BRANCH/pom.xml"
+DEVEL_VERSION=`curl -s $DEVEL_POM_URL|grep "&lt;version&gt;"|head -n 1|xargs|cut -c10-14`
+if [ "$DEVEL_VERSION" == "" ]; then
+    echo "ERROR: Could not get $DEVELOPMENT_BRANCH branch version, will
+    not push."
+    exit 1
+fi
+if [ "$CURRENT_VERSION" == "$DEVEL_VERSION" ]; then
+    echo "ERROR: Current branch version: $CURRENT_VERSION and development version: $DEVEL_VERSION are\
+                                    equal, cannot push, update version number according to semver.io"
+    sleep 5
+    exit 1
+else
+    echo "SUCCESS: Will push current version"
+fi
                                 </pre-push>
                             </hooks>
                         </configuration>
@@ -211,6 +232,51 @@
                         <argument>${project.basedir}/.git/hooks/pre-push</argument>
                     </arguments>
                 </configuration>
+            </plugin>
+            <!-- CHECKSTYLE PLUGIN -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>checkstyle-compile</id>
+                        <phase>validate</phase>
+                        <configuration>
+                            <configLocation>checkstyle.xml</configLocation>
+                            <encoding>UTF-8</encoding>
+                            <consoleOutput>true</consoleOutput>
+                            <failsOnError>true</failsOnError>
+                            <suppressionsLocation>checkstyle-suppression.xml</suppressionsLocation>
+                        </configuration>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- FINDBUGS PLUGIN -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>${version.findbugs-jsr305}</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <failOnError>true</failOnError>
+                    <threshold>Low</threshold>
+                    <xmlOutput>true</xmlOutput>
+                    <findbugsXmlOutputDirectory>${project.build.directory}/target/findbugs
+                    </findbugsXmlOutputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>findbugs</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

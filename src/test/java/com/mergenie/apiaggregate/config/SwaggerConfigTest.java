@@ -1,4 +1,4 @@
-package com.au.example.discovery.config;
+package com.mergenie.apiaggregate.config;
 
 import org.junit.Before;
 import org.junit.Test;
