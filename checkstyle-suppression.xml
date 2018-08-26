@@ -7,6 +7,6 @@
 <suppressions>
     <suppress files="DiscoveryApplication.java" checks="HideUtilityClassConstructor"/>
     <suppress files="SwaggerConfig.java" checks="DesignForExtension"/>
-    <suppress files="[\\/]com.au.example.discovery[\\/].*\.java$" checks="JavadocVariable"/>
-    <suppress files="[\\/]com.au.example.discovery[\\/].*\.java$" checks="JavadocPackage"/>
+    <suppress files="[\\/]com.mergenie[\\/].*\.java$" checks="JavadocVariable"/>
+    <suppress files="[\\/]com.mergenie[\\/].*\.java$" checks="JavadocPackage"/>
 </suppressions>
